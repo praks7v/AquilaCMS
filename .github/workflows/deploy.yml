@@ -35,21 +35,27 @@ jobs:
         docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
 
-  # deploy:
-  #   needs: build
-  #   runs-on: ubuntu-latest
+  deploy:
+    needs: build
+    runs-on: self-hosted
 
-  #   steps:
-  #   - name: SSH into EC2 and deploy
-  #     uses: appleboy/ssh-action@v0.1.6
-  #     with:
-  #       host: ${{ secrets.EC2_HOST }}
-  #       username: ${{ secrets.EC2_USER }}
-  #       key: ${{ secrets.EC2_SSH_KEY }}
-  #       script: |
-  #         docker pull ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
-  #         docker stop aquila || true
-  #         docker rm aquila || true
-  #         docker run -d --name aquila -p 3010:3010 \
-  #         --env MONGO_URI=mongodb://{{ secrets.DB_HOST }}:27017/your-database-name \
-  #         ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+    steps:
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add Bastion Host to known_hosts
+      run: ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Add Private EC2 Instance to known_hosts
+      run: ssh-keyscan -H ${{ secrets.PRIVATE_APP_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Private EC2 Instance via Bastion
+      run: |
+        ssh -o ProxyCommand="ssh -W %h:%p ec2-user@${{ secrets.BASTION_HOST }}" ec2-user@${{ secrets.PRIVATE_APP_HOST }} << EOF
+          cd /path/to/your/app
+          git pull origin main
+          npm install
+          npm run start
+        EOF
