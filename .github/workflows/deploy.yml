@@ -51,6 +51,16 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
         chmod 600 ~/.ssh/aquila-aws-key.pem
 
+    - name: Debug Environment
+      run: |
+        echo "Environment Variables:"
+        env
+        echo "File Permissions:"
+        ls -l ~/.ssh
+        echo "Known Hosts Contents:"
+        cat ~/.ssh/known_hosts
+
+
     # - name: Change file ownership
     #   run: |
     #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/aquila-aws-key.pem ubuntu@3.239.160.56 "sudo chown $USER:$USER ~/.ssh/aquila-aws-key.pem"
