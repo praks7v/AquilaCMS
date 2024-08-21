@@ -24,9 +24,6 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
-    - name: Build AquilaCMS
-      run: npm run build
-
     - name: Build Docker image
       run: docker build -t aquilacms .
 
