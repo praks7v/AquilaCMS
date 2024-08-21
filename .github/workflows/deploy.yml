@@ -1,39 +1,39 @@
-name: Build and Deploy AquilaCMS to EC2
+# name: Build and Deploy AquilaCMS to EC2
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '18'
 
-    - name: Install dependencies
-      run: yarn install
+#     - name: Install dependencies
+#       run: yarn install
 
-    - name: Build Docker image
-      run: docker build -t aquilacms .
+#     - name: Build Docker image
+#       run: docker build -t aquilacms .
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+#     - name: Log in to Docker Hub
+#       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Push Docker image
-      run: |
-        docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+#     - name: Push Docker image
+#       run: |
+#         docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+#         docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
 
   deploy:
     needs: build
@@ -53,7 +53,7 @@ jobs:
 
     - name: Change file ownership
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aquila-aws-key.pem ubuntu@{{ secrets.BASTION_HOST }} "sudo chown $USER:$USER ~/.ssh/aquila-aws-key.pem"
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aquila-aws-key.pem ubuntu@3.239.160.56 "sudo chown $USER:$USER ~/.ssh/aquila-aws-key.pem"
       env:
         USER: ubuntu
 
