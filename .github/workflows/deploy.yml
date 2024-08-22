@@ -52,7 +52,7 @@ jobs:
     - name: Set SSH Key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
-        chmod 600 ~/.ssh/aquila-aws-key.pem
+        sudo chmod 400 ~/.ssh/aquila-aws-key.pem
 
     - name: Start SSH Agent
       run: |
