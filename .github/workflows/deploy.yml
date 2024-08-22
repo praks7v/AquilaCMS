@@ -46,7 +46,7 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         
     - name: Create SSH Directory
-        run: mkdir -p ~/.ssh
+      run: mkdir -p ~/.ssh
 
     - name: Set SSH Key
       run: |
