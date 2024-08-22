@@ -16,30 +16,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: Set up Node.js
-    #   uses: actions/setup-node@v3
-    #   with:
-    #     node-version: '18'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-    # - name: Install Yarn
-    #   run: |
-    #     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    #     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-    #     sudo apt update && sudo apt install yarn -y
+    - name: Set up Yarn
+      uses: mskelton/setup-yarn@v1
+      with:
+        node-version: '18'
     
-    # - name: Install dependencies
-    #   run: yarn install
+    - name: Install dependencies
+      run: yarn install
 
-    # - name: Build Docker image
-    #   run: docker build -t aquilacms .
+    - name: Build Docker image
+      run: docker build -t aquilacms .
 
-    # - name: Log in to Docker Hub
-    #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    # - name: Push Docker image
-    #   run: |
-    #     docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
-    #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+    - name: Push Docker image
+      run: |
+        docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
 
   deploy:
     needs: build
@@ -64,65 +63,45 @@ jobs:
         ssh-add ~/.ssh/aquila-aws-key.pem
 
     - name: Add Database Host to known_hosts
-      run: ssh-keyscan -H ${{ secrets.PUBLIC_DB }} >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H ${{ secrets.AQUILA_DB_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Add App Host to known_hosts
-      run: ssh-keyscan -H ${{ secrets.PUBLIC_HOST }} >> ~/.ssh/known_hosts
+    - name: Add App Host 1 to known_hosts
+      run: ssh-keyscan -H ${{ secrets.AQUILA_APP_HOST_1 }} >> ~/.ssh/known_hosts
+
+    - name: Add App Host 2 to known_hosts
+      run: ssh-keyscan -H ${{ secrets.AQUILA_APP_HOST_2 }} >> ~/.ssh/known_hosts
 
     - name: Debug SSH Configuration
       run: |
         echo "Contents of known_hosts:"
         cat ~/.ssh/known_hosts
 
-    - name: Install MongoDB and Update Cache on DB instance
+    - name: Deploy Dockerize Database for APP instance
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PUBLIC_DB }} << 'EOF'
-          # Update package lists and install necessary packages
-          sudo apt-get update -y
-          sudo apt-get install -y gnupg curl
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AQUILA_DB_HOST }} << 'EOF'
+          # Pull the latest Docker image
+          docker pull mongo
 
-          # Add MongoDB repository and install MongoDB
-          curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-          sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
-          echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-
-          sudo apt-get update -y
-          sudo apt-get install -y mongodb-org
-
-          # Start, enable, and check MongoDB status
-          sudo systemctl start mongod
-          sudo systemctl enable mongod
-          sudo systemctl status mongod
-
-          # Restart MongoDB (if needed, might be redundant)
-          sudo systemctl restart mongod
+          # Run the Docker container
+          docker run -d --name aquila_app -e MONGO_URL="mongodb://${{ secrets.AQUILA_DB_HOST }}:27017/test" -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
         EOF
 
-
-    - name: Deploy Dockerize application on APP instance
+    - name: Deploy Dockerize application on APP 1 instance
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PUBLIC_DB }} << 'EOF'
-          # Add Docker's official GPG key
-          sudo apt-get update -y
-          sudo apt-get install -y ca-certificates curl
-          sudo install -m 0755 -d /etc/apt/keyrings
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-          # Add the Docker repository to Apt sources
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt-get update -y
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-          sudo usermod -aG docker $USER
-          sudo systemctl restart docker.socket
-          sudo systemctl start docker
-          sudo chmod 666 /var/run/docker.sock
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AQUILA_APP_HOST_1 }} << 'EOF'
           # Pull the latest Docker image
           docker pull ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
 
           # Run the Docker container
-          docker run -d --name myapp -p 3010:3010 ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+          docker run -d --name aquila_app -e MONGO_URL="mongodb://${{ secrets.AQUILA_DB_HOST }}:27017/test" -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
         EOF
 
+    - name: Deploy Dockerize application on APP 2 instance
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AQUILA_APP_HOST_2 }} << 'EOF'
+          # Pull the latest Docker image
+          docker pull ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+
+          # Run the Docker container
+          docker run -d --name aquila_app -p 3010:3010 ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+        EOF
