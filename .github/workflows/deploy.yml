@@ -49,7 +49,7 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
-        chmod 400 ~/.ssh/aquila-aws-key.pem
+        chmod 600 ~/.ssh/aquila-aws-key.pem
         eval "$(ssh-agent -s)"
         ssh-add ~/.ssh/aquila-aws-key.pem
         ssh-add -l
