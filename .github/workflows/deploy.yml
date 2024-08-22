@@ -46,8 +46,9 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         
     - name: Create SSH Directory
-      run: mkdir -p ~/.ssh
-
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
     - name: Set SSH Key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
