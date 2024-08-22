@@ -64,10 +64,10 @@ jobs:
         ssh-add ~/.ssh/aquila-aws-key.pem
 
     - name: Add Database Host to known_hosts
-      run: ssh-keyscan -H ${{ secrets.PRIVATE_DB_HOST }} >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H ${{ secrets.PUBLIC_DB }} >> ~/.ssh/known_hosts
 
     - name: Add App Host to known_hosts
-      run: ssh-keyscan -H ${{ secrets.PRIVATE_APP_HOST }} >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H ${{ secrets.PUBLIC_HOST }} >> ~/.ssh/known_hosts
 
     - name: Debug SSH Configuration
       run: |
@@ -76,7 +76,7 @@ jobs:
 
     - name: Install MongoDB and Update Cache on DB instance
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PRIVATE_DB_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PUBLIC_DB }} << 'EOF'
           # Update package lists and install necessary packages
           sudo apt-get update -y
           sudo apt-get install -y gnupg curl
@@ -101,7 +101,7 @@ jobs:
 
     - name: Deploy Dockerize application on APP instance
       run: |
-        ssh -o ProxyCommand="ssh -W %h:%p ubuntu@${{ secrets.BASTION_HOST }}" ubuntu@${{ secrets.PRIVATE_APP_HOST }} << 'EOF'
+        ssh -o ubuntu@${{ secrets.PUBLIC_HOST }} << 'EOF'
           # Add Docker's official GPG key
           sudo apt-get update -y
           sudo apt-get install -y ca-certificates curl
