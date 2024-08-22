@@ -45,21 +45,25 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Debug SSH Setup
-      run: |
-        echo "Directory Permissions:"
-        ls -ld ~/.ssh
-        echo "File Permissions:"
-        ls -l ~/.ssh/aquila-aws-key.pem || true
-
-    - name: Create SSH Directory
+    - name: Ensure .ssh Directory Exists
       run: |
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
+
+    - name: Debug Existing SSH Key File
+      run: |
+        ls -l ~/.ssh
+        ls -l ~/.ssh/aquila-aws-key.pem || true
+
     - name: Set SSH Key
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
         chmod 600 ~/.ssh/aquila-aws-key.pem
+
+    - name: Debug File Creation
+      run: |
+        ls -l ~/.ssh
+        cat ~/.ssh/aquila-aws-key.pem || echo "Failed to read SSH key"
 
     - name: Start SSH Agent
       run: |
