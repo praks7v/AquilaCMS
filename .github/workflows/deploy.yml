@@ -49,23 +49,10 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aquila-aws-key.pem
-        chmod 600 ~/.ssh/aquila-aws-key.pem
-
-    - name: Debug Environment
-      run: |
-        echo "Environment Variables:"
-        env
-        echo "File Permissions:"
-        ls -l ~/.ssh
-        echo "Known Hosts Contents:"
-        cat ~/.ssh/known_hosts
-
-
-    # - name: Change file ownership
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/aquila-aws-key.pem ubuntu@3.239.160.56 "sudo chown $USER:$USER ~/.ssh/aquila-aws-key.pem"
-    #   env:
-    #     USER: ubuntu
+        chmod 400 ~/.ssh/aquila-aws-key.pem
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/aquila-aws-key.pem
+        ssh-add -l
 
     - name: Add Bastion Host to known_hosts
       run: ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
@@ -75,6 +62,11 @@ jobs:
 
     - name: Add App Host to known_hosts
       run: ssh-keyscan -H ${{ secrets.PRIVATE_APP_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Debug SSH Configuration
+      run: |
+        echo "Contents of known_hosts:"
+        cat ~/.ssh/known_hosts
 
     - name: Update MongoDB and Cache
       run: |
