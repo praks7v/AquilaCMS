@@ -30,16 +30,16 @@ jobs:
     - name: Install dependencies
       run: yarn install
 
-    - name: Build Docker image
-      run: docker build -t aquilacms .
+    # - name: Build Docker image
+    #   run: docker build -t aquilacms .
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    # - name: Log in to Docker Hub
+    #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Push Docker image
-      run: |
-        docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+    # - name: Push Docker image
+    #   run: |
+    #     docker tag aquilacms:latest ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
+    #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
 
   deploy:
     needs: build
