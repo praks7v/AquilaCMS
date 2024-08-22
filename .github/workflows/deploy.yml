@@ -101,7 +101,7 @@ jobs:
 
     - name: Deploy Dockerize application on APP instance
       run: |
-        ssh -o ubuntu@${{ secrets.PUBLIC_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PUBLIC_DB }} << 'EOF'
           # Add Docker's official GPG key
           sudo apt-get update -y
           sudo apt-get install -y ca-certificates curl
