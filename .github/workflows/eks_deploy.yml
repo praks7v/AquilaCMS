@@ -44,15 +44,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Encode Kubeconfig (example)
+      - name: Encode Kubeconfig
         run: |
           echo "KUBECONFIG_BASE64=$(base64 -w 0 ~/.kube/config)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Debug Kubeconfig
+        run: echo $KUBECONFIG_BASE64
+        shell: bash
 
       - uses: tale/kubectl-action@v1
         with:
           base64-kube-config: ${{ env.KUBECONFIG_BASE64 }}
           kubectl-version: latest
 
+      - name: Inspect Environment
+        run: printenv
+        shell: bash
 
       - name: Update Kubernetes Deployment
         run: |
