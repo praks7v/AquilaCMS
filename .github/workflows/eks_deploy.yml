@@ -32,11 +32,16 @@ jobs:
       # - name: Push Docker image to Docker Hub
       #   run: |
       #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms-app:latest
-      - name: Apply Kubernetes manifest
-        uses: tale/kubectl-action@v1
+      - name: Encode Kubeconfig (example)
+        run: |
+          cat ~/.kube/config | base64 -w 0  # store output in a variable
+          echo "##@ mask kubeconfig"  # mask the variable in logs
+          echo "KUBECONFIG_BASE64=$(base64 -w 0 ~/.kube/config)" >> $GITHUB_ENV
+
+      - uses: tale/kubectl-action@v1
         with:
-          cluster-name: aquila-cluster
-          kubeconfig-file: ~/.kube/config
+          base64-kube-config: ${{ env.KUBECONFIG_BASE64 }} # reference the masked variable
+          kubectl-version: latest
 
       - name: Update Kubernetes Deployment
         run: |
