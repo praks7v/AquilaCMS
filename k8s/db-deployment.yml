@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aquila-db
+  serviceName: "aquila-db-service"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aquila-db
+  template:
+    metadata:
+      labels:
+        app: aquila-db
+    spec:
+      containers:
+      - name: aquila-db
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: aquila-db-storage
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: aquila-db-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aquila-db-service
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: aquila-db
