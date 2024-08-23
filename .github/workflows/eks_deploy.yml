@@ -47,7 +47,5 @@ jobs:
       - name: Update Kubernetes Deployment
         run: |
           aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.EKS_CLUSTER_REGION }}
-          kubectl set image deployment/aquilacms-app aquilacms-app=${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
-
           kubectl apply -f k8s/app-deployment.yaml
           kubectl apply -f k8s/db-deployment.yaml

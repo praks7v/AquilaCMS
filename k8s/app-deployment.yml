@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: aquilacms-app
-        image: praks007/aquilacms:latest
+        image: ${{ secrets.DOCKER_USERNAME }}/aquilacms:latest
         ports:
         - containerPort: 3010
         env:
