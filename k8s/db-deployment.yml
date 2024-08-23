@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: aquila-db
-        image: mongo:latest
+        image: bitnami/mongodb:latest
         ports:
         - containerPort: 27017
         volumeMounts:
