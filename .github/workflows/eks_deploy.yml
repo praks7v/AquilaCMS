@@ -32,6 +32,19 @@ jobs:
       # - name: Push Docker image to Docker Hub
       #   run: |
       #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms-app:latest
+      - name: install kubctl
+        uses: azure/setup-kubectl@v2.0
+        with:
+        id: install
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secretsAWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+
       - name: Encode Kubeconfig (example)
         run: |
           cat ~/.kube/config | base64 -w 0  # store output in a variable
