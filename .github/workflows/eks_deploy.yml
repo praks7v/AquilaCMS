@@ -33,7 +33,7 @@ jobs:
       #   run: |
       #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms-app:latest
       - name: Apply Kubernetes manifest
-        uses: aws-actions/eks-kubectl@v1
+        uses: tale/kubectl-action@v1
         with:
           cluster-name: aquila-cluster
           kubeconfig-file: ~/.kube/config
