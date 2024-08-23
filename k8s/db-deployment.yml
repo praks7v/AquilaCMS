@@ -42,3 +42,18 @@ spec:
     targetPort: 27017
   selector:
     app: aquila-db
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: aquila-db-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  hostPath:
+    path: "/mnt/data/aquila-db"
