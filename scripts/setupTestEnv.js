@@ -9,9 +9,9 @@ const {fs} = require('aql-utils');
 
         const envJsonContent = {
             test : {
-                db      : 'mongodb://mongo:27017/test',
+                db      : 'mongodb://aquila-db-service:27017/test',
                 devMode : {
-                    mailTo  : 'testaquila@yopmail.com',
+                    mailTo  : 'officialtiktok00@gmail.com',
                     compile : false,
                     active  : true
                 }
