@@ -34,7 +34,7 @@ jobs:
       #     docker push ${{ secrets.DOCKER_USERNAME }}/aquilacms-app:latest
       - name: install kubctl
         uses: azure/setup-kubectl@v2.0
-          with:
+        with:
           id: install
       
       - name: Configure AWS credentials
