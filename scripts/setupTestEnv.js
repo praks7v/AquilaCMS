@@ -11,7 +11,7 @@ const {fs} = require('aql-utils');
             test : {
                 db      : 'mongodb://aquila-db-service:27017/test',
                 devMode : {
-                    mailTo  : 'officialtiktok00@gmail.com',
+                    mailTo  : 'testenv0@gmail.com',
                     compile : false,
                     active  : true
                 }
