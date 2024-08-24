@@ -22,6 +22,35 @@ spec:
           value: "3010"
         - name: MONGO_URL
           value: "mongodb://aquilacms-db-service:27017"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/aquilacms/env.json
+          subPath: env.json
+      volumes:
+      - name: config-volume
+        configMap:
+          name: aquilacms-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aquilacms-config
+data:
+  env.json: |
+    {
+      "aquila": {
+        "jwt": {
+          "secret": "a67044f7-4ae6-4b04-b60c-ee9dbae516e7",
+          "options": {
+            "session": true
+          }
+        },
+        "db": "mongodb://aquilacms-db-service:27017/aquiladb"
+      }
+    }
+
+
 ---
 apiVersion: v1
 kind: Service
